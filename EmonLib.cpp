@@ -34,6 +34,24 @@ void EnergyMonitor::current(int _inPinI, double _ICAL)
 }
 
 //--------------------------------------------------------------------------------------
+// Sets the pins to be used for voltage and current sensors based on emontx pin map
+//--------------------------------------------------------------------------------------
+void EnergyMonitor::voltageTX(double _VCAL, double _PHASECAL)
+{
+   inPinV = 2;
+   VCAL = _VCAL;
+   PHASECAL = _PHASECAL;
+}
+
+void EnergyMonitor::currentTX(int _channel, double _ICAL)
+{
+   if (_channel == 1) inPinI = 3;
+   if (_channel == 2) inPinI = 0;
+   if (_channel == 3) inPinI = 1;
+   ICAL = _ICAL;
+}
+
+//--------------------------------------------------------------------------------------
 // emon_calc procedure
 // Calculates realPower,apparentPower,powerFactor,Vrms,Irms,kwh increment
 // From a sample window of the mains AC voltage and current.
@@ -147,7 +165,7 @@ void EnergyMonitor::calcVI(int wavelengths, int timeout)
 }
 
 //--------------------------------------------------------------------------------------
-void EnergyMonitor::calc_Irms(int NUMBER_OF_SAMPLES)
+double EnergyMonitor::calcIrms(int NUMBER_OF_SAMPLES)
 {
   int SUPPLYVOLTAGE = readVcc();
   
@@ -172,7 +190,7 @@ void EnergyMonitor::calc_Irms(int NUMBER_OF_SAMPLES)
   sumI = 0;
 //--------------------------------------------------------------------------------------       
  
-
+  return Irms;
 }
 
 void EnergyMonitor::serialprint()
