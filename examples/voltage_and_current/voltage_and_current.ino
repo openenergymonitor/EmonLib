@@ -7,8 +7,8 @@ void setup()
 {  
   Serial.begin(9600);
   
-  emon1.voltage(2, 238.5, 1.7);  // Voltage: input pin, calibration, phase_shift
-  emon1.current(0, 138.8);       // Current: input pin, calibration.
+  emon1.voltage(2, 234.26, 1.7);  // Voltage: input pin, calibration, phase_shift
+  emon1.current(1, 111.1);       // Current: input pin, calibration.
 }
 
 void loop()
