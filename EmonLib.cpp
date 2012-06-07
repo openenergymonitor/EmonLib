@@ -55,9 +55,9 @@ void EnergyMonitor::currentTX(int _channel, double _ICAL)
 // emon_calc procedure
 // Calculates realPower,apparentPower,powerFactor,Vrms,Irms,kwh increment
 // From a sample window of the mains AC voltage and current.
-// The Sample window length is defined by the number of wavelengths we choose to measure.
+// The Sample window length is defined by the number of half wavelengths or crossings we choose to measure.
 //--------------------------------------------------------------------------------------
-void EnergyMonitor::calcVI(int wavelengths, int timeout)
+void EnergyMonitor::calcVI(int crossings, int timeout)
 {
   int SUPPLYVOLTAGE = readVcc();
   int crossCount = 0;                             //Used to measure number of times threshold is crossed.
@@ -82,7 +82,7 @@ void EnergyMonitor::calcVI(int wavelengths, int timeout)
   //------------------------------------------------------------------------------------------------------------------------- 
   start = millis(); 
 
-  while ((crossCount < wavelengths) && ((millis()-start)<timeout)) 
+  while ((crossCount < crossingsw) && ((millis()-start)<timeout)) 
   {
     numberOfSamples++;                            //Count number of times looped.
 
@@ -130,7 +130,7 @@ void EnergyMonitor::calcVI(int wavelengths, int timeout)
     //-----------------------------------------------------------------------------
     // G) Find the number of times the voltage has crossed the initial voltage
     //    - every 2 crosses we will have sampled 1 wavelength 
-    //    - so this method allows us to sample an integer number of wavelengths which increases accuracy
+    //    - so this method allows us to sample an integer number of half wavelengths which increases accuracy
     //-----------------------------------------------------------------------------       
     lastVCross = checkVCross;                     
     if (sampleV > startV) checkVCross = true; 

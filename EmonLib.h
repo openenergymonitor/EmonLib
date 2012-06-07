@@ -27,7 +27,7 @@ class EnergyMonitor
     void voltageTX(double _VCAL, double _PHASECAL);
     void currentTX(int _channel, double _ICAL);
 
-    void calcVI(int wavelengths, int timeout);
+    void calcVI(int crossings, int timeout);
     double calcIrms(int NUMBER_OF_SAMPLES);
     void serialprint();
 

@@ -13,6 +13,6 @@ void setup()
 
 void loop()
 {
-  emon1.calcVI(20,2000);         // Calculate all. No.of wavelengths, time-out
+  emon1.calcVI(20,2000);         // Calculate all. No.of half wavelengths (crossings), time-out
   emon1.serialprint();           // Print out all variables
 }
