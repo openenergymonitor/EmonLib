@@ -82,7 +82,7 @@ void EnergyMonitor::calcVI(int crossings, int timeout)
   //------------------------------------------------------------------------------------------------------------------------- 
   start = millis(); 
 
-  while ((crossCount < crossingsw) && ((millis()-start)<timeout)) 
+  while ((crossCount < crossings) && ((millis()-start)<timeout)) 
   {
     numberOfSamples++;                            //Count number of times looped.
 
