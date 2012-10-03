@@ -167,7 +167,9 @@ void EnergyMonitor::calcVI(int crossings, int timeout)
 //--------------------------------------------------------------------------------------
 double EnergyMonitor::calcIrms(int NUMBER_OF_SAMPLES)
 {
-  int SUPPLYVOLTAGE = readVcc();
+  
+int SUPPLYVOLTAGE = readVcc();
+
   
   for (int n = 0; n < NUMBER_OF_SAMPLES; n++)
   {
@@ -208,15 +210,20 @@ void EnergyMonitor::serialprint()
     delay(100); 
 }
 
+//thanks to http://hacking.majenko.co.uk/making-accurate-adc-readings-on-arduino
 long EnergyMonitor::readVcc() {
   long result;
-  ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
-  delay(2);
-  ADCSRA |= _BV(ADSC);
+  #if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328__)
+  ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);  
+  #elif defined(__AVR_ATmega32U4__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  ADMUX = _BV(REFS0) | _BV(MUX4) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+  #endif
+  delay(2);					// Wait for Vref to settle
+  ADCSRA |= _BV(ADSC);				// Convert
   while (bit_is_set(ADCSRA,ADSC));
   result = ADCL;
   result |= ADCH<<8;
-  result = 1126400L / result;
+  result = 1125300L / result;			//1100mV*1023 ADC steps 
   return result;
 }
 
