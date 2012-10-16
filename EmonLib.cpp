@@ -211,13 +211,19 @@ void EnergyMonitor::serialprint()
 }
 
 //thanks to http://hacking.majenko.co.uk/making-accurate-adc-readings-on-arduino
+//and Jérôme who alerted us to http://provideyourown.com/2012/secret-arduino-voltmeter-measure-battery-voltage/
+
 long EnergyMonitor::readVcc() {
   long result;
   #if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328__)
   ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);  
   #elif defined(__AVR_ATmega32U4__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
   ADMUX = _BV(REFS0) | _BV(MUX4) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+  #elif defined (__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__)
+    ADMUX = _BV(MUX5) | _BV(MUX0);
+  #elif defined (__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
   #endif
+
   delay(2);					// Wait for Vref to settle
   ADCSRA |= _BV(ADSC);				// Convert
   while (bit_is_set(ADCSRA,ADSC));
