@@ -229,7 +229,7 @@ long EnergyMonitor::readVcc() {
   while (bit_is_set(ADCSRA,ADSC));
   result = ADCL;
   result |= ADCH<<8;
-  result = 1125300L / result;			//1100mV*1023 ADC steps 
+  result = 1126400L / result;			//1100mV*1024 ADC steps http://openenergymonitor.org/emon/node/1186
   return result;
 }
 
