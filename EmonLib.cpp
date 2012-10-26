@@ -215,7 +215,8 @@ void EnergyMonitor::serialprint()
 
 long EnergyMonitor::readVcc() {
   long result;
-  #if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328__)
+
+  #if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328__) || defined (__AVR_ATmega328P__)
   ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);  
   #elif defined(__AVR_ATmega32U4__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
   ADMUX = _BV(REFS0) | _BV(MUX4) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
