@@ -101,8 +101,8 @@ void EnergyMonitor::calcVI(int crossings, int timeout)
     //-----------------------------------------------------------------------------
     // B) Apply digital high pass filters to remove 2.5V DC offset (centered on 0V).
     //-----------------------------------------------------------------------------
-    filteredV = 0.996*(lastFilteredV+sampleV-lastSampleV);
-    filteredI = 0.996*(lastFilteredI+sampleI-lastSampleI);
+    filteredV = 0.996*(lastFilteredV+(sampleV-lastSampleV));
+    filteredI = 0.996*(lastFilteredI+(sampleI-lastSampleI));
    
     //-----------------------------------------------------------------------------
     // C) Root-mean-square method voltage
