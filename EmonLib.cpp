@@ -225,8 +225,10 @@ long EnergyMonitor::readVcc() {
   ADMUX = _BV(MUX5) | _BV(MUX0);
   #elif defined (__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
   ADMUX = _BV(MUX3) | _BV(MUX2);
+	
   #endif
 
+#if defined(__AVR__) 
   delay(2);					// Wait for Vref to settle
   ADCSRA |= _BV(ADSC);				// Convert
   while (bit_is_set(ADCSRA,ADSC));
@@ -234,5 +236,9 @@ long EnergyMonitor::readVcc() {
   result |= ADCH<<8;
   result = 1126400L / result;			//1100mV*1024 ADC steps http://openenergymonitor.org/emon/node/1186
   return result;
+#elif defined(__arm__)
+  return (3.3);				       //Arduino Due
+#else return (3.3);                            //Wild gess that other un-supported architectures will be running a 3.3V!
+#endif
 }
 
