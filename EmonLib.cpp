@@ -59,7 +59,12 @@ void EnergyMonitor::currentTX(int _channel, double _ICAL)
 //--------------------------------------------------------------------------------------
 void EnergyMonitor::calcVI(int crossings, int timeout)
 {
-  int SUPPLYVOLTAGE = readVcc();
+   #if defined emonTxV3
+	int SUPPLYVOLTAGE=3300;
+   #else 
+	int SUPPLYVOLTAGE = readVcc();
+   #endif
+
   int crossCount = 0;                             //Used to measure number of times threshold is crossed.
   int numberOfSamples = 0;                        //This is now incremented  
 
@@ -168,7 +173,11 @@ void EnergyMonitor::calcVI(int crossings, int timeout)
 double EnergyMonitor::calcIrms(int NUMBER_OF_SAMPLES)
 {
   
-int SUPPLYVOLTAGE = readVcc();
+   #if defined emonTxV3
+	int SUPPLYVOLTAGE=3300;
+   #else 
+	int SUPPLYVOLTAGE = readVcc();
+   #endif
 
   
   for (int n = 0; n < NUMBER_OF_SAMPLES; n++)
@@ -215,6 +224,8 @@ void EnergyMonitor::serialprint()
 
 long EnergyMonitor::readVcc() {
   long result;
+  
+  //not used on emonTx V3 - as Vcc is always 3.3V - eliminates bandgap error and need for calibration http://harizanov.com/2013/09/thoughts-on-avr-adc-accuracy/
 
   #if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328__) || defined (__AVR_ATmega328P__)
   ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);  
@@ -228,17 +239,19 @@ long EnergyMonitor::readVcc() {
 	
   #endif
 
-#if defined(__AVR__) 
-  delay(2);					// Wait for Vref to settle
-  ADCSRA |= _BV(ADSC);				// Convert
+
+  #if defined(__AVR__) 
+  delay(2);                                        // Wait for Vref to settle
+  ADCSRA |= _BV(ADSC);                             // Convert
   while (bit_is_set(ADCSRA,ADSC));
   result = ADCL;
   result |= ADCH<<8;
-  result = 1126400L / result;			//1100mV*1024 ADC steps http://openenergymonitor.org/emon/node/1186
+  result = 1126400L / result;                     //1100mV*1024 ADC steps http://openenergymonitor.org/emon/node/1186
   return result;
-#elif defined(__arm__)
-  return (3.3);				       //Arduino Due
-#else return (3.3);                            //Wild gess that other un-supported architectures will be running a 3.3V!
-#endif
+ #elif defined(__arm__)
+  return (3300);                                  //Arduino Due
+ #else 
+  return (3300);                                  //Guess that other un-supported architectures will be running a 3.3V!
+ #endif
 }
 
