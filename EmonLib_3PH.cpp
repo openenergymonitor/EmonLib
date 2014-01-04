@@ -2,10 +2,13 @@
   Emon.cpp - Library for openenergymonitor
   Created by Trystan Lea, April 27 2010
   GNU GPL
+  modified to use up to 12 bits ADC resolution (ex. Arduino Due)
+  also includes 3-phase buffer-delay algorithm for monitoring different line phases with single AC-AC voltage adapter.
+  by boredman@boredomprojects.net 26.12.2013
 */
 
 //#include "WProgram.h" un-comment for use on older versions of Arduino IDE
-#include "EmonLib.h"
+#include "EmonLib_3PH.h"
 
 #if defined(ARDUINO) && ARDUINO >= 100
 
@@ -20,11 +23,12 @@
 //--------------------------------------------------------------------------------------
 // Sets the pins to be used for voltage and current sensors
 //--------------------------------------------------------------------------------------
-void EnergyMonitor::voltage(int _inPinV, double _VCAL, double _PHASECAL)
+void EnergyMonitor::voltage(int _inPinV, double _VCAL, double _PHASECAL, int _PHASE)
 {
    inPinV = _inPinV;
    VCAL = _VCAL;
    PHASECAL = _PHASECAL;
+   PHASE = _PHASE;
 }
 
 void EnergyMonitor::current(int _inPinI, double _ICAL)
@@ -36,11 +40,12 @@ void EnergyMonitor::current(int _inPinI, double _ICAL)
 //--------------------------------------------------------------------------------------
 // Sets the pins to be used for voltage and current sensors based on emontx pin map
 //--------------------------------------------------------------------------------------
-void EnergyMonitor::voltageTX(double _VCAL, double _PHASECAL)
+void EnergyMonitor::voltageTX(double _VCAL, double _PHASECAL, int _PHASE)
 {
    inPinV = 2;
    VCAL = _VCAL;
    PHASECAL = _PHASECAL;
+   PHASE = _PHASE;
 }
 
 void EnergyMonitor::currentTX(int _channel, double _ICAL)
@@ -67,6 +72,9 @@ void EnergyMonitor::calcVI(int crossings, int timeout)
 
   int crossCount = 0;                             //Used to measure number of times threshold is crossed.
   int numberOfSamples = 0;                        //This is now incremented  
+  int numberOfPowerSamples = 0;                   //Needed because 1 cycle of voltages needs to be stored before use 
+	boolean lastVCross, checkVCross;						    //Used to measure number of times threshold is crossed.
+	double storedV[PHASE3];									        //Array to store >120 degrees of voltage samples
 
   //-------------------------------------------------------------------------------------------------------------------------
   // 1) Waits for the waveform to be close to 'zero' (500 adc) part in sin curve.
@@ -78,18 +86,18 @@ void EnergyMonitor::calcVI(int crossings, int timeout)
   while(st==false)                                   //the while loop...
   {
      startV = analogRead(inPinV);                    //using the voltage waveform
-     if ((startV < 550) && (startV > 440)) st=true;  //check its within range
+     if ((startV < (ADC_COUNTS/2+50)) && (startV > (ADC_COUNTS/2-50))) st=true;  //check its within range
      if ((millis()-start)>timeout) st = true;
   }
+//  Serial.print("startV=");  Serial.println(startV);
   
   //-------------------------------------------------------------------------------------------------------------------------
-  // 2) Main measurment loop
+  // 2) Main measurement loop
   //------------------------------------------------------------------------------------------------------------------------- 
   start = millis(); 
 
   while ((crossCount < crossings) && ((millis()-start)<timeout)) 
   {
-    numberOfSamples++;                            //Count number of times looped.
 
     lastSampleV=sampleV;                          //Used for digital high pass filter
     lastSampleI=sampleI;                          //Used for digital high pass filter
@@ -102,35 +110,57 @@ void EnergyMonitor::calcVI(int crossings, int timeout)
     //-----------------------------------------------------------------------------
     sampleV = analogRead(inPinV);                 //Read in raw voltage signal
     sampleI = analogRead(inPinI);                 //Read in raw current signal
-
+    
     //-----------------------------------------------------------------------------
     // B) Apply digital high pass filters to remove 2.5V DC offset (centered on 0V).
     //-----------------------------------------------------------------------------
     filteredV = 0.996*(lastFilteredV+(sampleV-lastSampleV));
     filteredI = 0.996*(lastFilteredI+(sampleI-lastSampleI));
    
-    //-----------------------------------------------------------------------------
-    // C) Root-mean-square method voltage
-    //-----------------------------------------------------------------------------  
-    sqV= filteredV * filteredV;                 //1) square voltage values
-    sumV += sqV;                                //2) sum
+    storedV[numberOfSamples%PHASE3] = filteredV;  // store this voltage sample in circular buffer
     
-    //-----------------------------------------------------------------------------
-    // D) Root-mean-square method current
-    //-----------------------------------------------------------------------------   
-    sqI = filteredI * filteredI;                //1) square current values
-    sumI += sqI;                                //2) sum 
+    if (crossCount >= 2)    // one complete cycle has been stored, so can use delayed
+    {                       // voltage samples to calculate instantaneous powers
     
-    //-----------------------------------------------------------------------------
-    // E) Phase calibration
-    //-----------------------------------------------------------------------------
-    phaseShiftedV = lastFilteredV + PHASECAL * (filteredV - lastFilteredV); 
-    
-    //-----------------------------------------------------------------------------
-    // F) Instantaneous power calc
-    //-----------------------------------------------------------------------------   
-    instP = phaseShiftedV * filteredI;          //Instantaneous Power
-    sumP +=instP;                               //Sum  
+      //-----------------------------------------------------------------------------
+      // C) Root-mean-square method voltage
+      //-----------------------------------------------------------------------------  
+      sqV= filteredV * filteredV;                 //1) square voltage values
+      sumV += sqV;                                //2) sum
+      
+      //-----------------------------------------------------------------------------
+      // D) Root-mean-square method current
+      //-----------------------------------------------------------------------------   
+      sqI = filteredI * filteredI;                //1) square current values
+      sumI += sqI;                                //2) sum 
+      
+      //-----------------------------------------------------------------------------
+      // E) Phase calibration
+      //    for phases 2 & 3 delays V by 120 degrees & 240 degrees respectively 
+      //    and shifts for fine adjustment and to correct transformer errors.
+      //-----------------------------------------------------------------------------
+      if( PHASE == 2 ) {
+        phaseShiftedV = storedV[(numberOfSamples-PHASE2-1)%PHASE3] 
+                      + PHASECAL * (storedV[(numberOfSamples-PHASE2)%PHASE3] - storedV[(numberOfSamples-PHASE2-1)%PHASE3]);
+      }
+      else if( PHASE == 3) {
+        phaseShiftedV = storedV[(numberOfSamples+1)%PHASE3] 
+                      + PHASECAL * (storedV[(numberOfSamples+2)%PHASE3] - storedV[(numberOfSamples+1)%PHASE3]);
+      }
+      else {  // PHASE==1
+        phaseShiftedV = lastFilteredV 
+                      + PHASECAL * (filteredV - lastFilteredV); 
+      }
+      
+      //-----------------------------------------------------------------------------
+      // F) Instantaneous power calc
+      //-----------------------------------------------------------------------------   
+      instP = phaseShiftedV * filteredI;          //Instantaneous Power
+      sumP +=instP;                               //Sum  
+      
+      //Count number of times looped for Power averages.
+      numberOfPowerSamples++;
+    }
     
     //-----------------------------------------------------------------------------
     // G) Find the number of times the voltage has crossed the initial voltage
@@ -138,27 +168,39 @@ void EnergyMonitor::calcVI(int crossings, int timeout)
     //    - so this method allows us to sample an integer number of half wavelengths which increases accuracy
     //-----------------------------------------------------------------------------       
     lastVCross = checkVCross;                     
-    if (sampleV > startV) checkVCross = true; 
-                     else checkVCross = false;
-    if (numberOfSamples==1) lastVCross = checkVCross;                  
+    if (sampleV > startV) 
+      checkVCross = true; 
+    else 
+      checkVCross = false;
+    if (numberOfSamples==0) 
+      lastVCross = checkVCross;                  
                      
-    if (lastVCross != checkVCross) crossCount++;
+    if (lastVCross != checkVCross) 
+      crossCount++;
+      
+    //Count number of times looped.
+    numberOfSamples++;                            
+  
   }
- 
+
+  //Serial.print("numberOfSamples=");  Serial.println(numberOfSamples);
+  //Serial.print("numberOfPowerSamples=");  Serial.println(numberOfPowerSamples);
+  //Serial.print("crossCount=");  Serial.println(crossCount);
+  
   //-------------------------------------------------------------------------------------------------------------------------
   // 3) Post loop calculations
   //------------------------------------------------------------------------------------------------------------------------- 
   //Calculation of the root of the mean of the voltage and current squared (rms)
   //Calibration coeficients applied. 
   
-  double V_RATIO = VCAL *((SUPPLYVOLTAGE/1000.0) / 1023.0);
-  Vrms = V_RATIO * sqrt(sumV / numberOfSamples); 
+  double V_RATIO = VCAL *((SUPPLYVOLTAGE/1000.0) / (ADC_COUNTS));
+  Vrms = V_RATIO * sqrt(sumV / numberOfPowerSamples); 
   
-  double I_RATIO = ICAL *((SUPPLYVOLTAGE/1000.0) / 1023.0);
-  Irms = I_RATIO * sqrt(sumI / numberOfSamples); 
+  double I_RATIO = ICAL *((SUPPLYVOLTAGE/1000.0) / (ADC_COUNTS));
+  Irms = I_RATIO * sqrt(sumI / numberOfPowerSamples); 
 
   //Calculation power values
-  realPower = V_RATIO * I_RATIO * sumP / numberOfSamples;
+  realPower = V_RATIO * I_RATIO * sumP / numberOfPowerSamples;
   apparentPower = Vrms * Irms;
   powerFactor=realPower / apparentPower;
 
@@ -194,7 +236,7 @@ double EnergyMonitor::calcIrms(int NUMBER_OF_SAMPLES)
     sumI += sqI;
   }
 
-  double I_RATIO = ICAL *((SUPPLYVOLTAGE/1000.0) / 1023.0);
+  double I_RATIO = ICAL *((SUPPLYVOLTAGE/1000.0) / (ADC_COUNTS));
   Irms = I_RATIO * sqrt(sumI / NUMBER_OF_SAMPLES); 
 
   //Reset accumulators
