@@ -2,6 +2,8 @@
   Emon.h - Library for openenergymonitor
   Created by Trystan Lea, April 27 2010
   GNU GPL
+  modified to use up to 12 bits ADC resolution (ex. Arduino Due)
+  by boredman@boredomprojects.net 26.12.2013
 */
 
 #ifndef EmonLib_h
@@ -16,6 +18,19 @@
 #include "WProgram.h"
 
 #endif
+
+// to enable 12-bit ADC resolution on Arduino Due, 
+// include the following line in main sketch inside setup() function:
+//  analogReadResolution(ADC_BITS);
+// otherwise will default to 10 bits, as in regular Arduino-based boards.
+#if defined(__arm__)
+#define ADC_BITS    12
+#else
+#define ADC_BITS    10
+#endif
+
+#define ADC_COUNTS  (1<<ADC_BITS)
+
 
 class EnergyMonitor
 {
