@@ -17,7 +17,7 @@ JeeLabs has done a good post on the topic: http://jeelabs.org/2011/12/29/out-wit
 
 
 
-Update: 5th January 2013: Support Added for Arduino Due (ARM Cortex-M3, 12-bit ADC) by icboredman.
+Update: 5th January 2014: Support Added for Arduino Due (ARM Cortex-M3, 12-bit ADC) by icboredman.
 
 To enable this feature on Arduino Due, add the following statement to setup() function in main sketch:
 analogReadResolution(ADC_BITS); This will set ADC_BITS to 12 (Arduino Due), EmonLib will otherwise default to 10 analogReadResolution(ADC_BITS);. 
