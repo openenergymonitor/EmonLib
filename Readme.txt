@@ -25,7 +25,7 @@ analogReadResolution(ADC_BITS); where ADC_BITS=12.
 Note: ADC_BITS automatically defaults to 10 on any other AVR-based board (e.g. ATmega328) .
 
 
-Arduino Due Example by icboredman:
+Arduino Due 3-phase Example by icboredman:
 
 Includes 3-phase buffer-delay algorithm, when CT sensors connected to different line phases.
 Support for 10 CT inputs (modifed emonTx hardware) and one AC-AC adapter. AC adapter must be connectred to phase 1
