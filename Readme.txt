@@ -21,5 +21,5 @@ Update: 5th January 2014: Support Added for Arduino Due (ARM Cortex-M3, 12-bit A
 
 To enable this feature on Arduino Due, add the following statement to setup() function in main sketch:
 analogReadResolution(ADC_BITS); This will set ADC_BITS to 12 (Arduino Due), EmonLib will otherwise default to 10 analogReadResolution(ADC_BITS);. 
-
+See blog post on using Arduino Due as energy monitor: http://boredomprojects.net/index.php/projects/home-energy-monitor
 
