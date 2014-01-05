@@ -23,12 +23,3 @@ To enable this feature on Arduino Due, add the following statement to setup() fu
 analogReadResolution(ADC_BITS); This will set ADC_BITS to 12 (Arduino Due), EmonLib will otherwise default to 10 analogReadResolution(ADC_BITS);. 
 
 
-
-Arduino Due 3-phase Example by icboredman:
-
-Includes 3-phase buffer-delay algorithm, when CT sensors connected to different line phases.
-Support for 10 CT inputs (modifed emonTx hardware) and one AC-AC adapter. AC adapter must be connectred to phase 1
-
-There are 10 CT inputs connected to various household lines (after circuit breakers) and 1 AC-AC voltage adapter connected to one of these lines, used to measure voltage.
-10 lines are connected to different phases, therefore, an extra parameter was added to functions voltage() and voltageTX() indicating a particular phase number.
-The AC-AC line voltage adapter must be connected to phase 1.
