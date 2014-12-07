@@ -1,0 +1,16 @@
+{
+  "name": "EmonLib",
+  "keywords": "electricity, energy, monitoring",
+  "description": "Energy Monitoring Library",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/openenergymonitor/EmonLib.git"
+  },
+  "frameworks": "arduino",
+  "platforms": 
+  [
+    "atmelavr",
+    "atmelsam"
+  ]
+}
