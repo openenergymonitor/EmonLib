@@ -84,10 +84,6 @@ void EnergyMonitor::calcVI(int crossings, int timeout)
      if ((millis()-start)>timeout) st = true;
   }
   
-   // Initialise filter values (otherwise these will be random at power-on) https://github.com/openenergymonitor/EmonLib/issues/4
-    filteredV = sampleV = analogRead(inPinV);
-    filteredI = sampleI = analogRead(inPinI);
-  
   //-------------------------------------------------------------------------------------------------------------------------
   // 2) Main measurment loop
   //------------------------------------------------------------------------------------------------------------------------- 
