@@ -248,7 +248,7 @@ long EnergyMonitor::readVcc() {
   while (bit_is_set(ADCSRA,ADSC));
   result = ADCL;
   result |= ADCH<<8;
-  result = 1126400L / result;                     //1100mV*1024 ADC steps http://openenergymonitor.org/emon/node/1186
+  result = READVCC_CALIBRATION_CONST / result;  //1100mV*1024 ADC steps http://openenergymonitor.org/emon/node/1186
   return result;
  #elif defined(__arm__)
   return (3300);                                  //Arduino Due
