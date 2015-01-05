@@ -69,7 +69,7 @@ class EnergyMonitor
     //Set Voltage and current input pins
     unsigned int inPinV;
     unsigned int inPinI;
-    //Calibration coeficients
+    //Calibration coefficients
     //These need to be set in order to obtain accurate results
     double VCAL;
     double ICAL;

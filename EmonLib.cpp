@@ -25,7 +25,8 @@ void EnergyMonitor::voltage(unsigned int _inPinV, double _VCAL, double _PHASECAL
    inPinV = _inPinV;
    VCAL = _VCAL;
    PHASECAL = _PHASECAL;
-} 
+   offsetV = ADC_COUNTS>>1;
+}
 
 void EnergyMonitor::current(unsigned int _inPinI, double _ICAL)
 {
