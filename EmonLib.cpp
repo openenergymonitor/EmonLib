@@ -154,10 +154,14 @@ void EnergyMonitor::calcVI(unsigned int crossings, unsigned int timeout)
   //Calibration coefficients applied. 
   
   double V_RATIO = VCAL *((SupplyVoltage/1000.0) / (ADC_COUNTS));
-  Vrms = V_RATIO * sqrt(sumV / numberOfSamples); 
+   //Vrms = V_RATIO * sqrt(sumV / numberOfSamples); 
+   Vrms = V_RATIO * squareRoot(sumV / numberOfSamples);
+
   
   double I_RATIO = ICAL *((SupplyVoltage/1000.0) / (ADC_COUNTS));
-  Irms = I_RATIO * sqrt(sumI / numberOfSamples); 
+   //Irms = I_RATIO * sqrt(sumI / numberOfSamples); 
+   Irms = I_RATIO * squareRoot(sumI / numberOfSamples);
+
 
   //Calculation power values
   realPower = V_RATIO * I_RATIO * sumP / numberOfSamples;
@@ -178,7 +182,7 @@ double EnergyMonitor::calcIrms(unsigned int Number_of_Samples)
    #if defined emonTxV3
 	int SupplyVoltage=3300;
    #else 
-	int SupplyVoltage = readVcc();
+	double SupplyVoltage = readVcc();
    #endif
 
   
@@ -199,7 +203,8 @@ double EnergyMonitor::calcIrms(unsigned int Number_of_Samples)
   }
 
   double I_RATIO = ICAL *((SupplyVoltage/1000.0) / (ADC_COUNTS));
-  Irms = I_RATIO * sqrt(sumI / Number_of_Samples); 
+	//Irms = I_RATIO * sqrt(sumI / Number_of_Samples); 
+  Irms = I_RATIO * squareRoot(sumI / Number_of_Samples); 
 
   //Reset accumulators
   sumI = 0;
@@ -257,5 +262,16 @@ long EnergyMonitor::readVcc() {
  #else 
   return (3300);                                  //Guess that other un-supported architectures will be running a 3.3V!
  #endif
+}
+double EnergyMonitor::squareRoot(double fg)  
+{
+  double n = fg / 2.0;
+  double lstX = 0.0;
+  while (n != lstX)
+  {
+    lstX = n;
+    n = (n + fg / n) / 2.0;
+  }
+  return n;
 }
 
