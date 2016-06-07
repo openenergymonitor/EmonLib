@@ -8,9 +8,10 @@
     "url": "https://github.com/openenergymonitor/EmonLib.git"
   },
   "frameworks": "arduino",
-  "platforms": 
+  "platforms":
   [
     "atmelavr",
     "atmelsam"
   ]
+  "version": 1.0,
 }
