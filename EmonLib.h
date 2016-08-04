@@ -40,7 +40,7 @@
 #endif
 
 #define ADC_COUNTS  (1<<ADC_BITS)
-
+#define ADC_MAX_VALUE  (ADC_COUNTS-1)
 
 class EnergyMonitor
 {
