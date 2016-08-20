@@ -84,7 +84,7 @@ void EnergyMonitor::calcVI(unsigned int crossings, unsigned int timeout)
   while(st==false)                                   //the while loop...
   {
      startV = analogRead(inPinV);                    //using the voltage waveform
-     if ((startV < (ADC_COUNTS*0.55)) && (startV > (ADC_COUNTS*0.45))) st=true;  //check its within range
+     if ((startV < (ADC_MAX_VALUE*0.55)) && (startV > (ADC_MAX_VALUE*0.45))) st=true;  //check its within range
      if ((millis()-start)>timeout) st = true;
   }
   
@@ -155,10 +155,10 @@ void EnergyMonitor::calcVI(unsigned int crossings, unsigned int timeout)
   //Calculation of the root of the mean of the voltage and current squared (rms)
   //Calibration coefficients applied. 
   
-  double V_RATIO = VCAL *((SupplyVoltage/1000.0) / (ADC_COUNTS));
+  double V_RATIO = VCAL * ((SupplyVoltage/1000.0) / (ADC_MAX_VALUE));
   Vrms = V_RATIO * sqrt(sumV / numberOfSamples); 
   
-  double I_RATIO = ICAL *((SupplyVoltage/1000.0) / (ADC_COUNTS));
+  double I_RATIO = ICAL * ((SupplyVoltage/1000.0) / (ADC_MAX_VALUE));
   Irms = I_RATIO * sqrt(sumI / numberOfSamples); 
 
   //Calculation power values
@@ -200,7 +200,7 @@ double EnergyMonitor::calcIrms(unsigned int Number_of_Samples)
     sumI += sqI;
   }
 
-  double I_RATIO = ICAL *((SupplyVoltage/1000.0) / (ADC_COUNTS));
+  double I_RATIO = ICAL * ((SupplyVoltage/1000.0) / (ADC_MAX_VALUE));
   Irms = I_RATIO * sqrt(sumI / Number_of_Samples); 
 
   //Reset accumulators
