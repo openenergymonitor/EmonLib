@@ -7,11 +7,7 @@
   Low Pass filter for offset removal replaces HP filter 1/1/2015 - RW
 */
 
-
-//
 // Proboscide99 10/08/2016 - Added ADMUX settings for ATmega1284 e 1284P (644 / 644P also, but not tested) in readVcc function
-//
-
 
 //#include "WProgram.h" un-comment for use on older versions of Arduino IDE
 #include "EmonLib.h"
