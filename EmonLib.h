@@ -58,6 +58,7 @@ class EnergyMonitor
 
     long readVcc();
     //Useful value variables
+	  double squareRoot(double fg);
     double realPower,
        apparentPower,
        powerFactor,
