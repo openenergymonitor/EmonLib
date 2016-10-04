@@ -29,7 +29,7 @@
 #define READVCC_CALIBRATION_CONST 1126400L
 #endif
 
-// to enable 12-bit ADC resolution on Arduino Due, 
+// to enable 12-bit ADC resolution on Arduino Due,
 // include the following line in main sketch inside setup() function:
 //  analogReadResolution(ADC_BITS);
 // otherwise will default to 10 bits, as in regular Arduino-based boards.
@@ -59,10 +59,10 @@ class EnergyMonitor
     long readVcc();
     //Useful value variables
     double realPower,
-       apparentPower,
-       powerFactor,
-       Vrms,
-       Irms;
+      apparentPower,
+      powerFactor,
+      Vrms,
+      Irms;
 
   private:
 
@@ -78,21 +78,21 @@ class EnergyMonitor
     //--------------------------------------------------------------------------------------
     // Variable declaration for emon_calc procedure
     //--------------------------------------------------------------------------------------
-	int sampleV;  							 //sample_ holds the raw analog read value
-	int sampleI;                     
+    int sampleV;                        //sample_ holds the raw analog read value
+    int sampleI;
 
-	double lastFilteredV,filteredV;          //Filtered_ is the raw analog value minus the DC offset
-	double filteredI;                  
-	double offsetV;                          //Low-pass filter output
-	double offsetI;                          //Low-pass filter output               
+    double lastFilteredV,filteredV;          //Filtered_ is the raw analog value minus the DC offset
+    double filteredI;
+    double offsetV;                          //Low-pass filter output
+    double offsetI;                          //Low-pass filter output
 
-	double phaseShiftedV;                             //Holds the calibrated phase shifted voltage.
+    double phaseShiftedV;                             //Holds the calibrated phase shifted voltage.
 
-	double sqV,sumV,sqI,sumI,instP,sumP;              //sq = squared, sum = Sum, inst = instantaneous
+    double sqV,sumV,sqI,sumI,instP,sumP;              //sq = squared, sum = Sum, inst = instantaneous
 
-	int startV;                                       //Instantaneous voltage at start of sample window.
+    int startV;                                       //Instantaneous voltage at start of sample window.
 
-	boolean lastVCross, checkVCross;                  //Used to measure number of times threshold is crossed.
+    boolean lastVCross, checkVCross;                  //Used to measure number of times threshold is crossed.
 
 
 };
