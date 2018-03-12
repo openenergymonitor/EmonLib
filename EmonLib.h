@@ -46,11 +46,8 @@ class EnergyMonitor
 {
   public:
 
-    void voltage(unsigned int _inPinV, double _VCAL, double _PHASECAL);
-    void current(unsigned int _inPinI, double _ICAL);
-
-    void voltageTX(double _VCAL, double _PHASECAL);
-    void currentTX(unsigned int _channel, double _ICAL);
+    void voltage(PinName _inPinV, double _VCAL, double _PHASECAL);
+    void current(PinName _inPinI, double _ICAL);
 
     void calcVI(unsigned int crossings, unsigned int timeout);
     double calcIrms(unsigned int NUMBER_OF_SAMPLES);
@@ -67,8 +64,8 @@ class EnergyMonitor
   private:
 
     //Set Voltage and current input pins
-    unsigned int inPinV;
-    unsigned int inPinI;
+    PinName inPinV;
+    PinName inPinI;
     //Calibration coefficients
     //These need to be set in order to obtain accurate results
     double VCAL;

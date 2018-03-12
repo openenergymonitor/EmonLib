@@ -22,7 +22,7 @@
 //--------------------------------------------------------------------------------------
 // Sets the pins to be used for voltage and current sensors
 //--------------------------------------------------------------------------------------
-void EnergyMonitor::voltage(unsigned int _inPinV, double _VCAL, double _PHASECAL)
+void EnergyMonitor::voltage(PinName _inPinV, double _VCAL, double _PHASECAL)
 {
   inPinV = _inPinV;
   VCAL = _VCAL;
@@ -30,29 +30,9 @@ void EnergyMonitor::voltage(unsigned int _inPinV, double _VCAL, double _PHASECAL
   offsetV = ADC_COUNTS>>1;
 }
 
-void EnergyMonitor::current(unsigned int _inPinI, double _ICAL)
+void EnergyMonitor::current(PinName _inPinI, double _ICAL)
 {
   inPinI = _inPinI;
-  ICAL = _ICAL;
-  offsetI = ADC_COUNTS>>1;
-}
-
-//--------------------------------------------------------------------------------------
-// Sets the pins to be used for voltage and current sensors based on emontx pin map
-//--------------------------------------------------------------------------------------
-void EnergyMonitor::voltageTX(double _VCAL, double _PHASECAL)
-{
-  inPinV = 2;
-  VCAL = _VCAL;
-  PHASECAL = _PHASECAL;
-  offsetV = ADC_COUNTS>>1;
-}
-
-void EnergyMonitor::currentTX(unsigned int _channel, double _ICAL)
-{
-  if (_channel == 1) inPinI = 3;
-  if (_channel == 2) inPinI = 0;
-  if (_channel == 3) inPinI = 1;
   ICAL = _ICAL;
   offsetI = ADC_COUNTS>>1;
 }
@@ -65,11 +45,7 @@ void EnergyMonitor::currentTX(unsigned int _channel, double _ICAL)
 //--------------------------------------------------------------------------------------
 void EnergyMonitor::calcVI(unsigned int crossings, unsigned int timeout)
 {
-  #if defined emonTxV3
-  int SupplyVoltage=3300;
-  #else
-  int SupplyVoltage = readVcc();
-  #endif
+  int SupplyVoltage = 3300;
 
   unsigned int crossCount = 0;                             //Used to measure number of times threshold is crossed.
   unsigned int numberOfSamples = 0;                        //This is now incremented
@@ -83,7 +59,7 @@ void EnergyMonitor::calcVI(unsigned int crossings, unsigned int timeout)
 
   while(st==false)                                   //the while loop...
   {
-    startV = analogRead(inPinV);                    //using the voltage waveform
+    startV = adc_read_value(inPinV);                    //using the voltage waveform
     if ((startV < (ADC_COUNTS*0.55)) && (startV > (ADC_COUNTS*0.45))) st=true;  //check its within range
     if ((millis()-start)>timeout) st = true;
   }
@@ -101,16 +77,16 @@ void EnergyMonitor::calcVI(unsigned int crossings, unsigned int timeout)
     //-----------------------------------------------------------------------------
     // A) Read in raw voltage and current samples
     //-----------------------------------------------------------------------------
-    sampleV = analogRead(inPinV);                 //Read in raw voltage signal
-    sampleI = analogRead(inPinI);                 //Read in raw current signal
+    sampleV = adc_read_value(inPinV);                 //Read in raw voltage signal
+    sampleI = adc_read_value(inPinI);                 //Read in raw current signal
 
     //-----------------------------------------------------------------------------
     // B) Apply digital low pass filters to extract the 2.5 V or 1.65 V dc offset,
     //     then subtract this - signal is now centred on 0 counts.
     //-----------------------------------------------------------------------------
-    offsetV = offsetV + ((sampleV-offsetV)/1024);
+    offsetV = offsetV + ((sampleV-offsetV)/4096);
     filteredV = sampleV - offsetV;
-    offsetI = offsetI + ((sampleI-offsetI)/1024);
+    offsetI = offsetI + ((sampleI-offsetI)/4096);
     filteredI = sampleI - offsetI;
 
     //-----------------------------------------------------------------------------
@@ -147,6 +123,8 @@ void EnergyMonitor::calcVI(unsigned int crossings, unsigned int timeout)
     if (numberOfSamples==1) lastVCross = checkVCross;
 
     if (lastVCross != checkVCross) crossCount++;
+    
+    // delayMicroseconds(100);
   }
 
   //-------------------------------------------------------------------------------------------------------------------------
@@ -186,11 +164,11 @@ double EnergyMonitor::calcIrms(unsigned int Number_of_Samples)
 
   for (unsigned int n = 0; n < Number_of_Samples; n++)
   {
-    sampleI = analogRead(inPinI);
+    sampleI = adc_read_value(inPinI);
 
     // Digital low pass filter extracts the 2.5 V or 1.65 V dc offset,
     //  then subtract this - signal is now centered on 0 counts.
-    offsetI = (offsetI + (sampleI-offsetI)/1024);
+    offsetI = (offsetI + (sampleI-offsetI)/4096);
     filteredI = sampleI - offsetI;
 
     // Root-mean-square method current
