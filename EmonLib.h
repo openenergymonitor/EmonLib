@@ -5,6 +5,9 @@
   modified to use up to 12 bits ADC resolution (ex. Arduino Due)
   by boredman@boredomprojects.net 26.12.2013
   Low Pass filter for offset removal replaces HP filter 1/1/2015 - RW
+
+  Modified to use more than 10 bits ADC resolution in more places than was fixed earlier.
+    by Jm Casler (jm@casler.org) 2020 05 11
 */
 
 #ifndef EmonLib_h
@@ -35,6 +38,8 @@
 // otherwise will default to 10 bits, as in regular Arduino-based boards.
 #if defined(__arm__)
 #define ADC_BITS    12
+#elif defined(ESP32)
+#define ADC_BITS    12
 #else
 #define ADC_BITS    10
 #endif
@@ -59,10 +64,10 @@ class EnergyMonitor
     long readVcc();
     //Useful value variables
     double realPower,
-      apparentPower,
-      powerFactor,
-      Vrms,
-      Irms;
+           apparentPower,
+           powerFactor,
+           Vrms,
+           Irms;
 
   private:
 
@@ -81,14 +86,14 @@ class EnergyMonitor
     int sampleV;                        //sample_ holds the raw analog read value
     int sampleI;
 
-    double lastFilteredV,filteredV;          //Filtered_ is the raw analog value minus the DC offset
+    double lastFilteredV, filteredV;         //Filtered_ is the raw analog value minus the DC offset
     double filteredI;
     double offsetV;                          //Low-pass filter output
     double offsetI;                          //Low-pass filter output
 
     double phaseShiftedV;                             //Holds the calibrated phase shifted voltage.
 
-    double sqV,sumV,sqI,sumI,instP,sumP;              //sq = squared, sum = Sum, inst = instantaneous
+    double sqV, sumV, sqI, sumI, instP, sumP;         //sq = squared, sum = Sum, inst = instantaneous
 
     int startV;                                       //Instantaneous voltage at start of sample window.
 
