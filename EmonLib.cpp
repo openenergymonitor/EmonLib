@@ -5,6 +5,9 @@
   modified to use up to 12 bits ADC resolution (ex. Arduino Due)
   by boredman@boredomprojects.net 26.12.2013
   Low Pass filter for offset removal replaces HP filter 1/1/2015 - RW
+
+  Modified to use more than 10 bits ADC resolution in more places than was fixed earlier.
+    by Jm Casler (jm@casler.org) 2020 05 11
 */
 
 // Proboscide99 10/08/2016 - Added ADMUX settings for ATmega1284 e 1284P (644 / 644P also, but not tested) in readVcc function
@@ -106,9 +109,9 @@ void EnergyMonitor::calcVI(unsigned int crossings, unsigned int timeout)
     // B) Apply digital low pass filters to extract the 2.5 V or 1.65 V dc offset,
     //     then subtract this - signal is now centred on 0 counts.
     //-----------------------------------------------------------------------------
-    offsetV = offsetV + ((sampleV-offsetV)/1024);
+    offsetV = offsetV + ((sampleV-offsetV)/ADC_COUNTS);
     filteredV = sampleV - offsetV;
-    offsetI = offsetI + ((sampleI-offsetI)/1024);
+    offsetI = offsetI + ((sampleI-offsetI)/ADC_COUNTS);
     filteredI = sampleI - offsetI;
 
     //-----------------------------------------------------------------------------
@@ -188,7 +191,7 @@ double EnergyMonitor::calcIrms(unsigned int Number_of_Samples)
 
     // Digital low pass filter extracts the 2.5 V or 1.65 V dc offset,
     //  then subtract this - signal is now centered on 0 counts.
-    offsetI = (offsetI + (sampleI-offsetI)/1024);
+    offsetI = (offsetI + (sampleI-offsetI)/ADC_COUNTS);
     filteredI = sampleI - offsetI;
 
     // Root-mean-square method current
