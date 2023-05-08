@@ -16,7 +16,7 @@
 
 #else
 
-#include "WProgram.h"
+// #include "WProgram.h"
 
 #endif
 
@@ -34,6 +34,8 @@
 //  analogReadResolution(ADC_BITS);
 // otherwise will default to 10 bits, as in regular Arduino-based boards.
 #if defined(__arm__)
+#define ADC_BITS    12
+#elif defined(ASP32)
 #define ADC_BITS    12
 #else
 #define ADC_BITS    10
